@@ -1,0 +1,40 @@
+Voici les specs... 😉
+
+Module
+-------
+Wifi
+ID unique ( id esp32 ?)
+Config réseau IP fixe
+(configurable facilement, par API ?)
+
+après le BOOT, faire flasher les lumières arc-en-ciel une couple de seconde genre pour informé qu'il est prêt.
+Check si réseau répond (Faire ping genre, mais je sais pas où!) et si erreur, pattern d'erreur sur les lumières
+
+Endpoint REST standard
+http, port 80
+Header http à valider
+Authorization: Bearer (tokenapi)
+GET /status
+Retourne json
+id: 
+ledstatut: on, off
+
+
+POST /on
+pattern: (trouver dans ce qui existe et qui est bien défini
+Couleur, ms, nb repeat, fin et etc. )
+Retourne 200 (ou autre erreur)
+
+POST /off
+Retourne 200 (ou autre erreur)
+
+POST /reboot
+Retourn 200 (ou autre erreur)
+
+Alimentation 12v (ou 5v, Le mieux)
+Boiter hermétique (environnement poussière), si possible, lumière pour indiquer si allumé.
+
+1x 2pieds de led (prototype) relié au boitier par fil de 5 pieds.
++ Une autre de 2pieds de led (éventuellement), à une distance de max 100 pieds
+
+Stéphane
