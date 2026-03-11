@@ -27,7 +27,7 @@ void setup() {
 
   BeginStrips();
 
-  SetOnboardLED(CRGB::Yellow);
+  SetAllLED(CRGB::Yellow);
 
   Serial.println("Connecting to WiFi...");
   while (WiFi.status() != WL_CONNECTED)
@@ -37,7 +37,8 @@ void setup() {
   }
   Serial.println("\nConnected to WiFi");
   Serial.println(WiFi.localIP());
-  SetOnboardLED(CRGB::Green);
+  
+  SetAllLED(CRGB::Blue);
 
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
@@ -82,5 +83,6 @@ void setup() {
 
 
 void loop() {
+    Rainbow();
 }
 
