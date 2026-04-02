@@ -2,87 +2,129 @@
 #include <FastLED.h>
 #include <WiFi.h>
 #include "StripMethods.cpp"
+#include <ArduinoJSON.h>
 
 #include <ESPAsyncWebServer.h>
 
 const char *ssid = "Hornblende";
 const char *password = "minuscule";
 
-const char* PARAM_MESSAGE = "message";
+const char *PARAM_MESSAGE = "json";
 
 AsyncWebServer server(80);
 
+bool rainbow = true;
 
-void notFound(AsyncWebServerRequest *request) {
-    request->send(404, "text/plain", "Not found");
+int patternIndex = 0;
+bool playPattern = false;
+
+JsonArray pattern = {};
+
+void notFound(AsyncWebServerRequest *request)
+{
+	request->send(404, "text/plain", "Not found");
 }
 
+void setup()
+{
+	// put your setup code here, to run once:
+	Serial.begin(9600);
+	delay(50);
+	Serial.println("Initializing LED...");
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  delay(50);
-  Serial.println("");
-  WiFi.begin(ssid, password);
+	
+	BeginStrips();
 
-  BeginStrips();
 
-  SetAllLED(CRGB::Yellow);
+	WiFi.begin(ssid, password);
+	Serial.println("Connecting to WiFi...");
+	while (WiFi.status() != WL_CONNECTED)
+	{
+		delay(500);
+		Serial.print(".");
+	}
 
-  Serial.println("Connecting to WiFi...");
-  while (WiFi.status() != WL_CONNECTED)
-  {
-      delay(500);
-      Serial.print(".");
-  }
-  Serial.println("\nConnected to WiFi");
-  Serial.println(WiFi.localIP());
-  
-  SetAllLED(CRGB::Blue);
 
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(200, "text/plain", "Hello, world");
-  });
+	SetBrightness(50);
+	SetAllLED(CRGB::Yellow);
 
-  // Send a GET request to <IP>/get?message=<message>
-  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
+
+	Serial.println("\nConnected to WiFi");
+
+	SetAllLED(CRGB::Green);
+
+	Serial.print("IP Address: ");
+	Serial.println(WiFi.localIP());
+
+	server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+			  { request->send(200, "text/plain", "Hello, world"); });
+
+	// Send a GET request to <IP>/get?message=<message>
+	server.on("/get", HTTP_GET, [](AsyncWebServerRequest *request)
+			  {
       String message;
       if (request->hasParam(PARAM_MESSAGE)) {
           message = request->getParam(PARAM_MESSAGE)->value();
       } else {
           message = "No message sent";
       }
-      request->send(200, "text/plain", "Hello, GET: " + message);
-  });
+      request->send(200, "text/plain", "Hello, GET: " + message); });
 
-  // Send a POST request to <IP>/post with a form field message set to <message>
-  server.on("/post", HTTP_POST, [](AsyncWebServerRequest *request){
+	// Send a POST request to <IP>/post with a form field message set to <message>
+	server.on("/post", HTTP_POST, [](AsyncWebServerRequest *request)
+			  {
       String message;
       if (request->hasParam(PARAM_MESSAGE, true)) {
-          message = request->getParam(PARAM_MESSAGE, true)->value();
-          if (message == "Red")
-            SetOnboardLED(CRGB::Red);
-          if (message == "Blue")
-            SetOnboardLED(CRGB::Blue);
-          if (message == "Green")
-            SetOnboardLED(CRGB::Green);
+		SetAllLED(CRGB::Black);
+		delay(200);
+		message = request->getParam(PARAM_MESSAGE, true)->value();
+		JsonDocument myObject;
+		deserializeJson(myObject, message);
+
+		if (myObject.containsKey("pattern")) {
+			pattern = myObject["pattern"].as<JsonArray>();
+			playPattern = true;
+		} else {
+			SetAllLED(CRGB::Red);
+		}
+
+		rainbow = false;
+
+
       } else {
           message = "No message sent";
       }
-      request->send(200, "text/plain", "Hello, POST: " + message);
-  });
+      request->send(200, "text/plain", "Hello, POST: " + message); });
 
-  server.onNotFound(notFound);
+	server.onNotFound(notFound);
 
-  server.begin();
+	server.begin();
 }
 
+void loop()
+{
+	if (rainbow)
+		Rainbow();
 
+	if (pattern)
+	{
 
-void loop() {
-    Rainbow();
+		String color = pattern[patternIndex].as<String>();
+
+		if (color == "Green")
+			SetAllLED(CRGB::Green);
+		if (color == "Red")
+			SetAllLED(CRGB::Red);
+		if (color == "Blue")
+			SetAllLED(CRGB::Blue);
+		if (color == "Orange")
+			SetAllLED(CRGB::Orange);
+
+		patternIndex++;
+		if (patternIndex > pattern.size())
+			patternIndex = 0;
+
+		delay(500);
+	}
 }
-

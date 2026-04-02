@@ -8,13 +8,15 @@ using namespace std;
 #define NUM_LEDS 1
 inline CRGB onboardLED[1];
  
-inline CRGB testStrip[10];
+#define LED_COUNT 28
+inline CRGB testStrip[LED_COUNT];
+
 
 
 inline void BeginStrips(int brightness = 50)
 {
     //FastLED.addLeds<WS2812B, 48, GRB>(onboardLED, 1);
-    FastLED.addLeds<WS2812B, 13, GRB>(testStrip, 10);
+    FastLED.addLeds<WS2812B, 13, GRB>(testStrip, LED_COUNT);
 }
 
 inline void SetOnboardLED(CRGB color) {
@@ -29,7 +31,7 @@ inline void SetBrightness(int brightness) {
 }
 
 inline void SetAllLED(CRGB color) {
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = 0; i < LED_COUNT; i++)
     {
         testStrip[i] = color;
     }
@@ -64,7 +66,7 @@ inline CRGB Wheel(byte WheelPosition) {
 }
 
 inline void Rainbow() {
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = 0; i < LED_COUNT; i++)
     {
     testStrip[i] = Wheel(millis() / 10);
     }
