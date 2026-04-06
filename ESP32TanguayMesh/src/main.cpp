@@ -158,7 +158,8 @@ void loop()
 	mesh.update();
 	userScheduler.execute();
 
-	// Fade white when not inside mesh AKA alone
+	// Fade white when not inside mesh AKA
+	// TODO check to change with a  root note check
 	if (mesh.getNodeList().size() == 0) {
 		PulseWhite();
 		connected = false;
