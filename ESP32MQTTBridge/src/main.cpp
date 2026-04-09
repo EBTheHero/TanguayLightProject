@@ -39,6 +39,8 @@ void setup() {
   mesh.setRoot(true);
   // This node and all other nodes should ideally know the mesh contains a root, so call this on all nodes
   mesh.setContainsRoot(true);
+
+  mqttClient.setBufferSize(2048);
 }
 void loop() {
   mesh.update();
@@ -58,13 +60,18 @@ void receivedCallback( const uint32_t &from, const String &msg ) {
   String topic = "painlessMesh/from/" + String(from);
   mqttClient.publish(topic.c_str(), msg.c_str());
 }
+
 void mqttCallback(char* topic, uint8_t* payload, unsigned int length) {
-  char* cleanPayload = (char*)malloc(length+1);
+  Serial.printf("bridge: Received MQTT length=%d to topic=%s\n", length, topic);
+	char* cleanPayload = (char*)malloc(length+1);
   memcpy(cleanPayload, payload, length);
   cleanPayload[length] = '\0';
   String msg = String(cleanPayload);
   free(cleanPayload);
   String targetStr = String(topic).substring(16);
+
+  Serial.printf("bridge: Received MQTT msg=%s to topic=%s\n with target=%s", msg.c_str(), topic, targetStr.c_str());
+
   if(targetStr == "gateway")
   {
     if(msg == "getNodes")

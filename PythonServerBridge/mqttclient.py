@@ -8,7 +8,22 @@ from paho.mqtt import client as mqtt_client
 
 broker = 'localhost'
 port = 1883
-topic = "painlessMesh/to/broadcast"
+
+
+topic = "painlessMesh/to/258100605"
+# msg = '{"state":"playing","looping":true,"pattern":[{"red":255,"green":255,"blue":255,"ms":1000},{"red":255,"green":0,"blue":0,"ms":1000},{"red":0,"green":255,"blue":0,"ms":1000},{"red":0,"green":0,"blue":255,"ms":1000}, {"red":100,"green":255,"blue":60,"ms":200},{"red":20,"green":111,"blue":255,"ms":200}]}'
+
+# blink red loop
+msg = '{"state":"playing","looping":true,"pattern":[{"red":255,"green":0,"blue":0,"ms":500},{"red":0,"green":0,"blue":0,"ms":500}]}'
+
+
+# blink red thrice
+# msg = '{"state":"playing","looping":false,"pattern":[{"red":255,"green":0,"blue":0,"ms":100},{"red":0,"green":0,"blue":0,"ms":100},{"red":255,"green":0,"blue":0,"ms":100},{"red":0,"green":0,"blue":0,"ms":100},{"red":255,"green":0,"blue":0,"ms":100},{"red":0,"green":0,"blue":0,"ms":100}]}'
+
+# topic = "painlessMesh/to/gateway"
+# msg = "getNodes"
+
+
 # Generate a Client ID with the publish prefix.
 client_id = f'publish-{random.randint(0, 1000)}'
 # username = 'emqx'
@@ -35,7 +50,6 @@ def connect_mqtt():
 def publish(client):
 
     time.sleep(1)
-    msg = f"r"
     result = client.publish(topic, msg)
     # result: [0, 1]
     status = result[0]
