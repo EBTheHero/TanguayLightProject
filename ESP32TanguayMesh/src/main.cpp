@@ -131,7 +131,7 @@ void setup()
 
 
 
-	mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
+	mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT, WIFI_AP_STA, 11);
 	mesh.onReceive(&receivedCallback);
 	mesh.onNewConnection(&newConnectionCallback);
 
