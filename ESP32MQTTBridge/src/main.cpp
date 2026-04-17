@@ -17,7 +17,7 @@
 
 
 #define   MESH_PREFIX     "TanguayLight"
-#define   MESH_PASSWORD   "0YpRu)48jqIb"
+#define   MESH_PASSWORD   "NotSoSecret!"
 #define   MESH_PORT       5555
 #define   STATION_SSID     "SuperSbap"
 #define   STATION_PASSWORD "bazinga!"
@@ -33,10 +33,10 @@ painlessMesh  mesh;
 WiFiClient wifiClient;
 PubSubClient mqttClient(mqttBroker, 1883, mqttCallback, wifiClient);
 void setup() {
-  Serial.begin(115200);
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
 
   mesh.init( MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, STATION_CHANNEL );
+
   mesh.onReceive(&receivedCallback);
   mesh.stationManual(STATION_SSID, STATION_PASSWORD);
   mesh.setHostname(HOSTNAME);
@@ -47,9 +47,10 @@ void setup() {
 
   mqttClient.setBufferSize(2048);
 
-  	Serial.begin(115200);
-	  delay(50);
-	  Serial.println("Hello from brudge");
+  Serial.begin(115200);
+	delay(50);
+  Serial.printf("nodeID:%u\n", mesh.getNodeId());
+
 }
 
 std::vector<String> split (const String &s, char delim) {
@@ -71,7 +72,7 @@ void loop() {
   if(myIP != getlocalIP()){
     myIP = getlocalIP();
     Serial.println("My IP is " + myIP.toString());
-
+	  Serial.printf("My ID: %d", String(mesh.getNodeId()));
   }
 
   // We are online, but not connected to MQTT broker

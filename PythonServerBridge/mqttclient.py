@@ -1,11 +1,11 @@
-# python 3.11
-
 import random
 import time
+import json
 
 from paho.mqtt import client as mqtt_client
 
 import paho.mqtt.subscribe as subscribe
+import paho.mqtt.client as mqtt 
 
 broker = 'localhost'
 port = 1883
@@ -16,7 +16,14 @@ topic = "painlessMesh/to/258100605"
 
 # blink red loop
 msg = '{"state":"playing","looping":true,"pattern":[{"red":255,"green":0,"blue":0,"ms":500},{"red":0,"green":0,"blue":0,"ms":500}]}'
-import paho.mqtt.client as mqtt 
+
+patterns: dict = {}
+
+with open('patterns.json') as f:
+    patterns = json.load(f)
+    print("patterns loaded")
+
+
 
 def on_subscribe(client, userdata, mid, reason_code_list, properties):
     # Since we subscribed only for a single channel, reason_code_list contains
@@ -57,5 +64,15 @@ mqttc.on_unsubscribe = on_unsubscribe
 
 mqttc.user_data_set({})
 mqttc.connect(broker)
-mqttc.loop_forever()
-print(f"Received the following message: {mqttc.user_data_get()}")
+
+mqttc.loop_start()
+
+time.sleep(0.5)
+
+while True:
+    x = input("")
+    if (x in patterns):
+        print("sending pattern")
+        mqttc.publish("painlessMesh/to/broadcast", json.dumps(patterns[x]))
+    else:
+        print("pattern not present")

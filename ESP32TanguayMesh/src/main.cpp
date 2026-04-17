@@ -5,7 +5,7 @@
 #include <exception>
 
 #define MESH_PREFIX "TanguayLight"
-#define MESH_PASSWORD "0YpRu)48jqIb"
+#define MESH_PASSWORD "NotSoSecret!"
 #define MESH_PORT 5555
 #define   STATION_CHANNEL 1
 
@@ -68,7 +68,8 @@ void deserializeJsonAndApply(String& json) {
 	} else {
 		Serial.println("JSON received successfully");
 		try {				
-			state = doc["state"].as<String>();
+			//state = doc["state"].as<String>();
+			state = "playing";
 			looping = doc["looping"].as<bool>(); 
 
 			patternIndex = 0;
@@ -213,7 +214,7 @@ void loop()
 
 	if (millis() > patternTimer && state == "playing") {
 		// Timer elapsed, load next color from pattern
-		JsonArray pattern = doc["pattern"].as<JsonArray>();
+		JsonArray pattern = doc["sequence"].as<JsonArray>();
 
 		
 		if (patternIndex >= pattern.size()) {

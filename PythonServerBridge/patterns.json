@@ -1,0 +1,49 @@
+{
+    "flashRed": 
+    {
+        "looping": true,
+        "sequence": [
+          {
+            "red": 255,
+            "green": 0,
+            "blue": 0,
+            "ms": 500
+          },
+          {
+            "red": 0,
+            "green": 0,
+            "blue": 0,
+            "ms": 500
+          }
+        ]
+      },
+      "flashGreen": {
+        "looping": true,
+        "sequence": [
+          {
+            "red": 0,
+            "green": 255,
+            "blue": 0,
+            "ms": 500
+          },
+          {
+            "red": 0,
+            "green": 0,
+            "blue": 0,
+            "ms": 500
+          }
+        ]
+      },
+      "black": {
+        "looping": false,
+        "sequence": [
+          {
+            "red": 0,
+            "green": 0,
+            "blue": 0,
+            "ms": 500
+          }
+        ]
+      }
+
+}
