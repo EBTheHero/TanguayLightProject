@@ -1,6 +1,7 @@
 import random
 import time
 import json
+import tkinter as tk
 
 from paho.mqtt import client as mqtt_client
 
@@ -46,8 +47,6 @@ def on_message(client, userdata, message: mqtt.MQTTMessage):
     # userdata is the structure we choose to provide, here it's a list()
     print(f"Message on {message.topic} : {message.payload}")
 
-
-
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code.is_failure:
         print(f"Failed to connect: {reason_code}. loop_forever() will retry connection")
@@ -67,12 +66,21 @@ mqttc.connect(broker)
 
 mqttc.loop_start()
 
+
+# root = tk.Tk()
+# root.title("Quick UI")
+
+# meshSelect = tk.Listbox(root)
+# meshSelect.pack()
+#root.mainloop()
+
+
 time.sleep(0.5)
 
 while True:
     x = input("")
     if (x in patterns):
         print("sending pattern")
-        mqttc.publish("painlessMesh/to/broadcast", json.dumps(patterns[x]))
+        mqttc.publish("painlessMesh/to/3632907513/broadcast", json.dumps(patterns[x]))
     else:
         print("pattern not present")

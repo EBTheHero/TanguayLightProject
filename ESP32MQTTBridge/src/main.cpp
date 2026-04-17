@@ -49,7 +49,8 @@ void setup() {
 
   Serial.begin(115200);
 	delay(50);
-  Serial.printf("nodeID:%u\n", mesh.getNodeId());
+  String s = String(mesh.getNodeId());
+  Serial.println("nodeID:"+ s);
 
 }
 
@@ -80,8 +81,11 @@ void loop() {
     Serial.println("Attempting to connect to MQTT...");
     if (mqttClient.connect(MESH_PREFIX)) {
       Serial.println("Success!");
-      mqttClient.publish("painlessMesh/from/gateway","Ready!");
-      mqttClient.subscribe("painlessMesh/to/#");
+      String s = "painlessMesh/from/" + String(mesh.getNodeId());
+      mqttClient.publish(s.c_str(),"Ready!");
+      String y = "painlessMesh/to/" + String(mesh.getNodeId()) + "/#";
+      mqttClient.subscribe(y.c_str());
+      mqttClient.subscribe("painlessMesh/to/allRoots");
     } else {
       Serial.printf("failed to connect to mqtt broker. error code: %d \n", mqttClient.state());
     }
@@ -105,11 +109,11 @@ void mqttCallback(char* topic, uint8_t* payload, unsigned int length) {
    std::vector<String> v = split (topic, '/');
 
   //String targetStr = String(topic).substring(16);
-  String targetStr = v[2];
+  String targetStr = v[v.size() - 1];
 
   Serial.printf("bridge: Received MQTT msg=%s to topic=%s\n with target=%s", msg.c_str(), topic, targetStr.c_str());
 
-  if(targetStr == "gateway")
+  if(targetStr == "allRoots")
   {
     if(msg == "getNodes")
     {
@@ -118,7 +122,8 @@ void mqttCallback(char* topic, uint8_t* payload, unsigned int length) {
       String str;
       for (auto &&id : nodes)
         str += String(id) + String(" ");
-      mqttClient.publish("painlessMesh/from/gateway", tree.c_str());
+      String s = "painlessMesh/from/" + String(mesh.getNodeId());
+      mqttClient.publish(s.c_str(), tree.c_str());
     }
   }
   else if(targetStr == "broadcast") 
@@ -134,7 +139,8 @@ void mqttCallback(char* topic, uint8_t* payload, unsigned int length) {
     }
     else
     {
-      mqttClient.publish("painlessMesh/from/gateway", "Client not connected!");
+      String s = "painlessMesh/from/" + String(mesh.getNodeId());
+      mqttClient.publish(s.c_str(),"Client not connected!");
     }
   }
 }
