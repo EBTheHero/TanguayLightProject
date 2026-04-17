@@ -7,6 +7,7 @@
 #define MESH_PREFIX "TanguayLight"
 #define MESH_PASSWORD "0YpRu)48jqIb"
 #define MESH_PORT 5555
+#define   STATION_CHANNEL 1
 
 #include <painlessMesh.h>
 
@@ -167,7 +168,7 @@ void setup()
 
 
 
-	mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT, WIFI_AP_STA, 11);
+	mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT, WIFI_AP_STA, STATION_CHANNEL);
 	mesh.onReceive(&receivedCallback);
 	mesh.onNewConnection(&newConnectionCallback);
 

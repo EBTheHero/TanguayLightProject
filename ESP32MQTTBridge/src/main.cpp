@@ -11,27 +11,32 @@
 #include <painlessMesh.h>
 #include <PubSubClient.h>
 #include <WiFiClient.h>
+
+#include <sstream>
+#include <vector>
+
+
 #define   MESH_PREFIX     "TanguayLight"
 #define   MESH_PASSWORD   "0YpRu)48jqIb"
 #define   MESH_PORT       5555
-#define   STATION_SSID     "Hornblende"
-#define   STATION_PASSWORD "minuscule"
+#define   STATION_SSID     "SuperSbap"
+#define   STATION_PASSWORD "bazinga!"
+#define   STATION_CHANNEL 1
 #define HOSTNAME "MQTT_Bridge"
 // Prototypes
 void receivedCallback( const uint32_t &from, const String &msg );
 void mqttCallback(char* topic, byte* payload, unsigned int length);
 IPAddress getlocalIP();
 IPAddress myIP(0,0,0,0);
-IPAddress mqttBroker(192, 168, 1, 125);
+IPAddress mqttBroker(192, 168, 1, 101); // MQTT server ip
 painlessMesh  mesh;
 WiFiClient wifiClient;
 PubSubClient mqttClient(mqttBroker, 1883, mqttCallback, wifiClient);
 void setup() {
   Serial.begin(115200);
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
-  // Channel set to 6. Make sure to use the same channel for your mesh and for you other
-  // network (STATION_SSID)
-  mesh.init( MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 11 );
+
+  mesh.init( MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, STATION_CHANNEL );
   mesh.onReceive(&receivedCallback);
   mesh.stationManual(STATION_SSID, STATION_PASSWORD);
   mesh.setHostname(HOSTNAME);
@@ -41,17 +46,44 @@ void setup() {
   mesh.setContainsRoot(true);
 
   mqttClient.setBufferSize(2048);
+
+  	Serial.begin(115200);
+	  delay(50);
+	  Serial.println("Hello from brudge");
 }
+
+std::vector<String> split (const String &s, char delim) {
+    std::vector<String> result;
+    std::stringstream ss (s.c_str());
+    std::string item;
+
+    while (getline (ss, item, delim)) {
+        result.push_back (item.c_str());
+    }
+
+    return result;
+}
+
+
 void loop() {
   mesh.update();
   mqttClient.loop();
   if(myIP != getlocalIP()){
     myIP = getlocalIP();
     Serial.println("My IP is " + myIP.toString());
-    if (mqttClient.connect("painlessMeshClient")) {
+
+  }
+
+  // We are online, but not connected to MQTT broker
+  if (myIP != IPAddress(0,0,0,0) && mqttClient.state() != 0) {
+    Serial.println("Attempting to connect to MQTT...");
+    if (mqttClient.connect(MESH_PREFIX)) {
+      Serial.println("Success!");
       mqttClient.publish("painlessMesh/from/gateway","Ready!");
       mqttClient.subscribe("painlessMesh/to/#");
-    } 
+    } else {
+      Serial.printf("failed to connect to mqtt broker. error code: %d \n", mqttClient.state());
+    }
   }
 }
 
@@ -68,7 +100,11 @@ void mqttCallback(char* topic, uint8_t* payload, unsigned int length) {
   cleanPayload[length] = '\0';
   String msg = String(cleanPayload);
   free(cleanPayload);
-  String targetStr = String(topic).substring(16);
+
+   std::vector<String> v = split (topic, '/');
+
+  //String targetStr = String(topic).substring(16);
+  String targetStr = v[2];
 
   Serial.printf("bridge: Received MQTT msg=%s to topic=%s\n with target=%s", msg.c_str(), topic, targetStr.c_str());
 
@@ -77,10 +113,11 @@ void mqttCallback(char* topic, uint8_t* payload, unsigned int length) {
     if(msg == "getNodes")
     {
       auto nodes = mesh.getNodeList(true);
+      auto tree = mesh.subConnectionJson();
       String str;
       for (auto &&id : nodes)
         str += String(id) + String(" ");
-      mqttClient.publish("painlessMesh/from/gateway", str.c_str());
+      mqttClient.publish("painlessMesh/from/gateway", tree.c_str());
     }
   }
   else if(targetStr == "broadcast") 
